@@ -1,0 +1,12 @@
+{application, ezwebframe,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { ezwebframe_app, []}},
+  {env, []}
+ ]}.
