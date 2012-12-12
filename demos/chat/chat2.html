@@ -1,0 +1,48 @@
+<script type="text/javascript" src="/common/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/ezwebframe/websock.js"></script>
+<link rel="stylesheet" href="./chat2.css" type="text/css">
+<body>
+  <h2>Chat</h2>
+  <div id="idle">
+    <input id="nick_input"/>
+    <button id="join">Join</button>
+    <br/>
+  </div>
+  <div id="running">
+    <table>
+      <tr>
+	<td><div id="scroll"></div></td>
+	<td><div id="users"></div></td>
+      </tr>
+      <tr>
+	<td colspan="2">
+	  <input id="tell" class="live_input"/><br/>
+	  <button class="live_button" id="leave">Leave</button>
+	</td>
+      </tr>
+    </table>
+  </div>
+</body>
+<script>
+$(document).ready(run);
+
+function run(){
+  $("#running").hide();
+  $("#join").click(function(){
+      var val = $("#nick_input").val();
+      $("#nick_input").val("");
+      send_json({'join':val});
+      })
+}
+
+function hide_div(o){
+    $("#" + o.id).hide();
+}
+  
+function show_div(o){
+    $("#" + o.id).show();
+}
+
+connect_to_erlang("localhost", 1456, "chat2");
+
+</script>

@@ -1,0 +1,22 @@
+<script type="text/javascript" src="/common/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/ezwebframe/websock.js"></script>
+<link rel="stylesheet" href="./shell1.css" type="text/css">
+<style>
+
+</style>
+
+<body>
+  <h2>Erlang shell</h2>
+   <div id="scroll"></div>
+  <p>
+  <input id="input" class="live_input"> </input>
+</body>
+
+<script>
+
+$(document).ready(run);
+
+function run(){
+    connect_to_erlang("localhost", 1456, "shell1");
+}
+</script>

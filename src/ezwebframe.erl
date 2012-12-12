@@ -114,9 +114,20 @@ serve_abs_file(File, Req, Env) ->
 list_dir(Root, Req, Env) ->
     io:format("List dir:~p~n",[Root]),
     {ok, Files} = file:list_dir(Root),
-    L1 = [["<li><a href='",I,"'>",I,"</a></li>"] || I <- lists:sort(Files)],
-    reply_html(["<h1> Directory ",Root, "</h1>",
-		"<ul>",L1,"</ul>"], Req, Env).
+    Files1 = [add_slash(I, Root) || I <- Files],
+    L1 = [["<li><a href='",I,"'>",I,"</a></li>\n"] || I <- lists:sort(Files1)],
+    reply_html(["<h1> Directory ",Root, "</h1>\n",
+		"<ul>\n",L1,"</ul>\n"], Req, Env).
+
+add_slash(I, Root) ->
+    io:format("Add slash:~p ~p~n",[I,Root]),
+    Full = filename:join(Root, I),
+    case filelib:is_dir(Full) of
+	true ->
+	    I ++ "/";
+	false ->
+	    I
+    end.
 
 send_page(Type, Data, Req) ->
     cowboy_req:reply(200, [{<<"Content-Type">>,

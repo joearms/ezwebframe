@@ -1,0 +1,110 @@
+<script type="text/javascript" src="/common/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/ezwebframe/websock.js"></script>
+<link rel="stylesheet" href="clock1.css" type="text/css">
+
+<body>
+    <!-- define a div where the output will go -->
+    <div id="clock"></div>
+
+    <!-- define two buttons -->
+    <button id="b1">start</button>
+    <button id="b2">stop</button>
+    <hr/>
+    <h2>Notes</h2>
+    <p>This example has a fairly detailed explanation of
+    how the browser is interfaced to the server. I suggest you read this
+    first.</p>
+    <ul>
+      <li><a href="clock2.html">clock2.html</a> has the same code
+      as this example, but with all the explanations removed.</li>
+      <li><a href="clock3.html">clock3.html</a> is more or less the same as the version in my book
+      </li>
+    </ul>
+    <hr/>
+    <h2>Explanation</h2>
+    <p>1. We define a region on the page to receive messages.
+    This is a div called <b>clock</b>. We define this as follows:</p>
+    <pre>
+&lt;div id='clock'>&lt;/div>
+    </pre>
+    <p>2. When the page is loaded we connect to the server by calling:</p>
+    <pre>
+connect_to_erlang("localhost", 1456, "clock1");
+    </pre>
+    <p>3. On the server side an Erlang server is started by evaluating
+    <b>clock1:start(B)</b>.</p>
+    <pre>
+start(Browser) ->
+    Browser ! [{cmd,fill_div}, {id,clock}, {txt,current_time()}],
+    running(Browser).
+    </pre>
+    <p>The server starts by sending a <b>fill_div</b> command to
+    the browser with arguments <b>{id,clock}</b> and 
+    <b>{txt,current_time()}</b>.
+    This updates the content of the clock div in the browser.</p>
+
+    <p>4. On the server we call <b>running(Browser)</b> this is as
+    follows:</p>
+    <pre>
+running(Browser) ->
+    receive
+	{Browser, {struct, [{clicked,<<"stop">>}]}} ->
+	    Browser ! [{cmd,fill_div}, {id,clock}, {txt,<<"Stopped">>}],
+	    idle(Browser)
+    after 1000 ->
+	    Browser ! [{cmd,fill_div}, {id,clock}, {txt,current_time()}],
+	    running(Browser)
+    end.
+    </pre>
+    
+    <p>When the timeout triggers (after every second) we send a message
+    to update the clock.</p>
+      
+    <h2>Interacting with the clock</h2>
+      
+    <p>Now we might want to start or stop stop the clock. This
+    needs some jquery trickery.</p>
+      
+    <p>The stop button is created with:</p>
+    <pre>
+&lt;button id="b1">stop&lt;/button>
+    </pre>
+    <p>We add a small amount of jquery code to the button:</p>
+    <pre> 
+$("#b1").click(function(){
+	send_json({clicked:'stop'});
+    });
+      </pre>
+      <p>And when we click stop button a JSON message is sent to the 
+      Erlang server.</p>
+      
+      <p>The message to the server can be received with:</p>
+      
+      <pre>
+receive
+	{Browser, {struct, [{clicked,<<"stop">>}]}} ->
+	    ...
+end
+      </pre>
+</body>
+
+<script>
+$(document).ready(run);
+
+function run(){
+    // when button b1 is press send a message to Erlang
+    $("#b1").click(function(){
+	send_json({clicked:'start'});
+    });
+    
+    // same for b2
+    $("#b2").click(function(){
+	send_json({clicked:'stop'});
+    });
+
+    // Erlang will start executing in clock1:start(Ws)
+    // read the code in clock1.erl
+
+    connect_to_erlang("localhost", 1456, "clock1");
+}
+</script>

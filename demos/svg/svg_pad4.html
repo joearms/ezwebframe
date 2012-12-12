@@ -1,0 +1,43 @@
+<script type="text/javascript" src="/common/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/ezwebframe/websock.js"></script>
+
+<script>
+var V = new Array();
+
+</script>
+<script type="text/javascript" src="svg_pad4.js"></script>
+
+<h2>SVG Pad</h2>
+
+<p>This tests the following:
+<b>svg_pad4.js svg_pad4.html svg_pad4.erl websocket.js</b>
+ 
+<p>To do add foreign objects - I have a working demo
+in <a href="foreign_objects.html">foreign_objects</a>
+
+<p>The program svg_test4.erl pushes objects to this window
+Here we push random rectangles to the pad
+
+<h2>To Do</h2>
+<ul>
+  <li>Make Horizontally constainder draggables</li>
+  <li>Make elastic lines
+  </li>
+</ul>
+
+<div id="here"></div>
+
+<p>
+
+<button id="stop">toggle</button>
+
+<div id="log"></div>
+<script>
+
+$(document).ready(run);
+
+function run(){
+  connect_to_erlang("localhost", 1456, "svg_pad4");
+}
+</script>
+

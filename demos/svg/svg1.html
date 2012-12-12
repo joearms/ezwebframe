@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<script type="text/javascript" src="/common/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/ezwebframe/websock.js"></script>
+<link rel="stylesheet" href="./svg1.css" type="text/css">
+<body>
+  <div id="svg"></div>
+  <button id="start" class="live_button">draw rectangle</button>
+</body>
+
+<script>
+
+$(document).ready(run);
+
+function run(){
+  connect_to_erlang("localhost", 1456, "svg1");
+}
+
+var canvas;
+var svg_ns='http://www.w3.org/2000/svg';
+
+function add_canvas(o){
+    canvas = document.createElementNS(svg_ns, 'svg');
+    canvas.setAttribute("width",  o.width);
+    canvas.setAttribute("height", o.height );
+    canvas.setAttribute("style",  "background-color:#eeffbb");
+    $('#'+o.tag).append(canvas);
+}
+
+function add_svg_thing(o){
+    var obj = document.createElementNS(svg_ns, o.type);
+    for(key in o){
+	var val = o[key];
+	obj.setAttributeNS(null, key, val);
+    };
+    canvas.appendChild(obj);
+}
+</script>

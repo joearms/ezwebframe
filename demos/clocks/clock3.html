@@ -1,0 +1,23 @@
+<script type="text/javascript" src="/common/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/ezwebframe/websock.js"></script>
+<link rel="stylesheet" href="clock1.css" type="text/css">
+
+<body>
+    <div id="clock"></div>
+    <button class="live_button" id="start">start</button>
+    <button class="live_button" id="stop">stop</button>
+    <p>For a detailed explantion of how this works see
+    <a href="clock1.html">clock1.html</a>. Or read the chapter on websockets in
+    <i>Programming Erlang</i> (2'nd edition)</p>
+
+    </p>
+</
+</body>
+
+<script>
+$(document).ready(run);
+
+function run(){
+    connect_to_erlang("localhost", 1456, "clock1");
+}
+</script>

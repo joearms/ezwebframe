@@ -1,0 +1,5 @@
+*.beam
+*~
+/deps
+/ebin
+.#*

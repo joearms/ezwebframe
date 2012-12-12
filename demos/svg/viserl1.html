@@ -1,0 +1,518 @@
+<script type="text/javascript" src="/common/jquery-1.7.1.min.js"></script>
+
+<script>
+
+var SVG = {};
+var V={};
+
+// drag variables
+
+SVG.xstart = 0;
+SVG.ystart = 0;
+SVG.dragging = false;
+SVG.dragobj = null;
+SVG.canvas = null;
+
+
+// a component has 
+//  C.name = unique Id
+//  C.template = name of the template
+//  C.x x coord
+//  C.y y coord
+//  C.Attr
+
+var Component = {};
+
+Component.erik =  
+    {template:'person', x:300, y:50,  attributes:{guid:"p1", date:"1987-09-24", 
+							       who:"erik"}};
+
+Component.joe = 
+    {template:'person', x:120, y:250, attributes:{guid:'joe124', 
+						  who:"joe", date:"2012-08-12"}};
+
+Component.kenneth = 
+    {template:'person', x:500, y:250, attributes:{guid:'abc123',
+						  date:"2005-04-23",
+						  who:"kenneth"}};
+
+Component.jim = 
+    {template:'person', x:120, y:450, attributes:{guid:'12abc123',
+						  date:"2007-04-23",
+						  who:"Jim"}};
+
+    // {name:1, template:'one', x:50,y:20,  txt:"Component1"},
+    // {name:2, template:'one', x:300,y:145,txt:"Component number1"},
+    // {name:3, template:'one', x:500,y:45, txt:"Component number3"}
+
+		  
+var Wires = 
+    [
+	{index:'l11', fromId:'erik', fromcon:'bot', toId: 'joe', tocon: 'top'},
+	{index:'l12', fromId:'erik', fromcon:'bot', toId: 'kenneth', tocon: 'top'},
+	{index:'l13', fromId:'joe', fromcon:'right', toId: 'kenneth', tocon: 'left'},
+	{index:'l14', fromId:'joe', fromcon:'bot', toId: 'jim', tocon: 'top'},
+	{index:'l15', fromId:'kenneth', fromcon:'bot', toId: 'jim', tocon: 'right'},
+
+    ];
+
+var Template = {};
+var Csize = 5;
+
+Template.person = {
+
+    width:200,ht:80,color:'#a1a1a1',
+
+    attributes:{who:   {type:'text',x:30,y:50,width:100,fill:'red',str:'**who**'},
+		guid:  {type:'text',x:12,y:20,width:100,fill:'orange',str:'**guid**'},
+		date:  {type:'text',x:110,y:20,width:100,fill:'black',str:'**date**'},
+		plip: {type:'circle',cx:10,cy:70,r:5,fill:'blue'},
+		gold: {type:'circle',cx:180,cy:70,r:5,fill:'gold'},
+		plop: {type:'rect', x:20,y:90,width:20, height:3,fill:'green'},
+		name: {type:'entry',x:12,y:20,width:100,fill:'green'}},
+    connectors:{left:{x:0,y:40},
+		top:{x:100,y:0},
+		right:{x:200, y:40},
+		bot:{x:100, y:80}}};
+
+SVG.svg_ns = 'http://www.w3.org/2000/svg';
+SVG.xhtml_ns = 'http://www.w3.org/1999/xhtml';
+SVG.xlinkns = 'http://www.w3.org/1999/xlink';
+
+
+// drag variables
+SVG.xstart = 0;
+SVG.ystart = 0;
+SVG.dragging = false;
+SVG.dragobj = null;
+SVG.canvas = null;
+    
+SVG.id = function(tag) {
+    return document.getElementById(tag);
+};
+
+SVG.D = function(x, y) {
+    return x == undefined ? y : x;
+};
+
+SVG.save = function(key, val){
+    if(key !== undefined){
+	if(V.hasOwnProperty(key)){
+	    alert('Error SVG created object with duplicate ID = ' + key);
+	} else {
+	    V[key] = val;
+	}
+    }
+}
+
+SVG.add_canvas = function(o) {
+    var canvas = document.createElementNS(SVG.svg_ns, 'svg');
+    canvas.setAttribute("width", SVG.D(o.width, 200));
+    canvas.setAttribute("height", SVG.D(o.ht, 100));
+    canvas.setAttribute("style","background-color:" + 
+			SVG.D(o.color, "#eeffbb"));
+    canvas.setAttribute("id", o.id);
+    canvas.addEventListener("mousemove", SVG.mouse_move, false);
+    canvas.addEventListener("mousedown", SVG.mouse_down, false);
+    canvas.addEventListener("mouseup", SVG.mouse_up, false);
+    SVG.id(o.parent).appendChild(canvas);
+    // add a marker that be used to add the tip to the end of the arrows
+    var marker = SVG.make_arrow_marker();
+    canvas.appendChild(marker);
+    SVG.save(o.id, canvas);
+    return canvas;
+};
+
+SVG.make_arrow_marker = function()
+{
+    var marker = document.createElementNS(SVG.svg_ns, "marker");
+    marker.setAttribute("id", "myArrowTip"); // <-- the name in url(#...)
+    marker.setAttribute("viewBox","0 0 10 10");
+    marker.setAttribute("refX",1);
+    marker.setAttribute("refY",5);
+    marker.setAttribute("markerUnits", 8);
+    marker.setAttribute("orient","auto");
+    marker.setAttribute("markerWidth",8);
+    marker.setAttribute("markerHeight",6);
+    var path = document.createElementNS(SVG.svg_ns, "polyline");
+    path.setAttribute("points","0,0 10,5 0,10 1,5");
+    path.setAttribute("fill","darkblue");
+    marker.appendChild(path);
+    return marker;
+};
+
+$(document).ready(run);
+
+function run(){
+    $("#update").click(do_update);
+    SVG.add_canvas({parent:"here",
+		    width:800,ht:800,color:'#aabbcc',id:'svg'});
+    render_components();
+    draw_wires();
+    show_controls();
+}
+
+function show_controls(){
+    for(var name in Component){
+	var opt = $("<option>").text(name);
+	opt.attr("name", name);
+	$("#select").change(show_selected);
+	// console.log("input",opt);
+	$("#select").append(opt);
+    };
+    
+}
+
+function do_update(){
+    console.log('do_update');
+    var key = $("#select").find(":selected").text();
+    console.log('update', key);
+    // read the table
+    var x = {};
+    var objId = $("#tab1").attr("name");
+    var template = Component[objId].template;
+    var desc = Template[template].attributes;
+    console.log('updating data for object', objId);
+    console.log('updating data desc=', desc);
+    $("#tab1 tr").each(function(){
+	var children=$(this).children();
+	// console.log('c', children);
+	var key = children.eq(0).text();
+	var val = children.eq(1).val();
+	x[key] = val;
+	desc[key].id = objId + "." + key;
+	console.log('update key,val', [key,val,desc[key]]);	
+	configure_attribute(key, val, desc[key]);
+    });
+    console.log('x', x);
+    
+}
+
+function show_selected(){
+    var key = $("#select").find(":selected").text();
+    console.log("show_selected", key);
+    // get the data for key
+    var attributes = Component[key].attributes;
+    // make a table of keys and editable values
+    var table = $("<table id='tab1'>");
+    $("#edit").html(""); // clear the old value
+    $("#edit").append(table);
+    table.attr("name", key);
+    for(var key in attributes){
+	var val =  attributes[key];
+	var row=$("<tr>");
+	table.append(row);
+	var col1 = $("<td>").text(key);
+	row.append(col1);
+	var col2 = $("<input>").val(val);
+	row.append(col2);
+	console.log("attrs", [key,val]);
+    }
+}
+
+function draw_wires(){
+    for(var i=0; i<Wires.length;i++){
+	draw_the_wire(i);
+    }
+}
+
+function draw_the_wire(i){
+    var wire = Wires[i];
+    var from = wire.fromId;
+    var g1 = V[wire.fromId];
+    //console.log('g1', g1);
+    var g1x = parseInt(g1.getAttribute('x'));
+    var g1y = parseInt(g1.getAttribute('y'));
+    var g1con = Template[g1.template].connectors;
+    //console.log('g1con',[g1con,wire.fromcon]);
+    var g1dxy = g1con[wire.fromcon];
+    // console.log('g1c',[g1x,g1y]);
+    var g2 = V[wire.toId];
+    var g2x = parseInt(g2.getAttribute('x'));
+    var g2y = parseInt(g2.getAttribute('y'));
+    var g2con = Template[g1.template].connectors;
+    var g2dxy = g2con[wire.tocon];
+    // console.log('g1c',[g1x,g1y,g2x,g2y,g1dxy]);
+    var x1 = g1x + g1dxy.x;
+    var y1 = g1y + g1dxy.y;
+    var x2 = g2x + g2dxy.x;
+    var y2 = g2y + g2dxy.y;
+    var f = SVG.endpoints(x1,y1,Csize,x2,y2,Csize);
+    SVG.add_line({parent:'svg',id:wire.index,x1:f.x1,y1:f.y1,x2:f.x2,y2:f.y2,
+		  arrow:true});
+}
+
+SVG.add_line = function(o)
+{
+    //console.log('add_line',o);
+    var obj= document.createElementNS(SVG.svg_ns,"line");
+    obj.setAttribute("x1", o.x1);
+    obj.setAttribute("y1", o.y1);
+    obj.setAttribute("x2", o.x2);
+    obj.setAttribute("y2", o.y2);
+    obj.setAttribute("stroke","black");
+    var width = SVG.D(o.width,1);
+    obj.setAttribute("stroke-width",width+"px");
+    obj.setAttribute("fill",SVG.D(o.fill,"black"));
+    if (o.arrow == true)
+	obj.setAttribute("marker-end","url(#myArrowTip)");
+    obj.setAttribute("id", o.id);
+    V[o.parent].appendChild(obj);
+    SVG.save(o.id, obj);
+};
+
+function render_components(){
+    for(var key in Component){
+	render_component(key, Component[key]);
+    }
+}
+
+SVG.mk_generic = function(o){
+    console.log('mk_gen',o);
+    var obj = document.createElementNS(SVG.svg_ns, o.type);
+    for(key in o){
+	var val = o[key];
+	obj.setAttributeNS(null, key, val);
+    };
+    V[o.parent].appendChild(obj);
+    SVG.save(o.id, obj);
+}
+
+function render_component(name, o){
+    // render component draws the component - inside a group
+    console.log('render_component',o);
+    var group = document.createElementNS(SVG.svg_ns, 'g');
+    group.type="draggable";
+    group.id = o.id;
+    group.template = o.template;
+    group.type = 'draggable';
+    var x = o.x;
+    var y = o.y;
+    var t = "translate("+x+","+y+")";
+    group.setAttribute('transform', t);
+    group.setAttribute('x',x);
+    group.setAttribute('y',y);
+    V['svg'].appendChild(group);
+    SVG.save(name, group);
+    var proto = Template[o.template];
+    // make the main rectangle
+    var r = SVG.mk_generic({parent:name,type:'rect',
+			    fill:proto.color,rx:10,ry:10,
+			    x:0,y:0,width:proto.width,height:proto.ht});
+    // add the attributes from the proptotype
+    for(var i in proto.attributes){
+	render_attribute(name, i, proto.attributes[i]);
+    };
+    // configure the attribues from the model
+    configure_attributes(o);
+    // add the connectors
+    //console.log('her12',proto.connectors);
+    for(var i in proto.connectors){
+	//console.log('looking at', proto.connectors[i]);
+	var e = proto.connectors[i];
+	SVG.mk_generic({parent:name,
+			type:'circle',
+			fill:'red',
+			cx:e.x,cy:e.y,r:Csize,
+			
+		       });
+    };
+}
+
+function configure_attributes(o){
+    // console.log('configure_attributes:',o);
+    var template = Template[o.template];
+    // console.log('template=',template);
+    for(var key in o.attributes){
+	configure_attribute(key, 
+			    o.attributes[key],
+			    template.attributes[key]
+			   );
+    };
+}
+
+function configure_attribute(key, val, desc){
+    console.log('configure_attr', [key,val,desc]);
+    switch(desc.type){
+    case 'text':
+	configure_text(val, desc);
+	break;
+    default:
+	console.log("How do I configure a ", o);
+	break;
+	}
+}
+
+function configure_text(str, desc){
+    var text_node = V[desc.id];
+    // console.log("configure_txt ", [str, desc, text_node]);
+    // text_node.setAttribute("data", str);
+    // text_node.data = str;
+    // text_node.innerText = str;
+    // $(text_node).val(str);
+    // All the above failed -- then next worked :-)
+    text_node.textContent = str;
+}
+
+function render_attribute(parent, name, o){
+    console.log('render_attr parent,', [parent,o]);
+    o.parent = parent;
+    switch(o.type){
+    case 'entry':
+	console.log('cannot render entry yet');
+	break;
+    case 'text':
+	// set a name here ...
+	// console.log('adding text id=???', [parent, name]),
+	o.id = parent + "." + name;
+	SVG.add_text(o);
+	break;
+    default:
+	SVG.mk_generic(o);
+	break;
+    }
+}
+
+SVG.add_text = function(o) 
+{
+    var text = document.createElementNS(SVG.svg_ns, "text");
+    text.setAttribute("fill", SVG.D(o.fill,"black"));
+    var size = SVG.D(o.size, 1);
+    text.setAttribute("font-size", size+"em");
+    var font = SVG.D(o.font,"Arial");
+    text.setAttribute("font-family", font);
+    text.setAttribute("x", SVG.D(o.x,10));
+    text.setAttribute("y", SVG.D(o.y,10));
+    // start middle end
+    text.setAttribute("text-anchor", SVG.D(o.anchor,"start"));
+    var str = SVG.D(o.str,"** missing str in text **");
+    var data = document.createTextNode(o.str);
+    text.setAttribute("id", o.id);
+    text.appendChild(data);
+    V[o.parent].appendChild(text);
+    // console.log("text node has name=",o.id);
+    SVG.save(o.id, text);
+};
+
+
+SVG.endpoints = function(x1,y1,r1,x2,y2,r2)
+{
+   // line between two circles
+    var m,a,b,x3,y3,x4,y4;
+    m = 5; // marker offset
+    d = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+    b = x1;
+    a = (x2 - b)/d;
+    x3 = r1*a + b;
+    x4 = (d-r2-m)*a + b;
+    b = y1;
+    a = (y2 - b)/d;
+    y3 = (r1)*a + b;
+    y4 = (d-r2-m)*a + b;
+    return {x1:x3, y1:y3, x2:x4, y2:y4} 
+}
+
+SVG.mouse_up = function(evt)
+{
+    // can get mouse up from a click on a button
+    if(SVG.dragging){
+	SVG.dragging = false;
+	var t = evt.target.parentNode;
+	var x  = t.getAttribute("x");
+	var y  = t.getAttribute("y");
+	var z  = t.getAttribute("id");
+	// console.log('stop dragging', [t,z]);
+	// SVG.log("stop dragging x=" + x +" y=" + y);
+	// send_json({cmd:'stop_drag',x:x,y:y,id:z});
+	if(t.ondrop){
+	    t.ondrop(x, y);
+	}
+    }
+};
+    
+SVG.mouse_move = function(evt)
+{ 
+    if (SVG.dragging) 
+	{
+	    var t = evt.target;
+	    var x = evt.clientX + window.scrollX;
+	    var y = evt.clientY + window.scrollY;
+	    // Move drag element by the same amount the cursor has moved.
+	    var x1 = (x-SVG.xstart);
+	    var y1 = (y-SVG.ystart);
+	    if (SVG.dragobj.constrain == "h"){
+		// if we want to constrain the dragging we 
+		// freeze y1
+		y1 = SVG.dragobj.getAttribute("y");
+	    };
+	    if (SVG.dragobj.constrain == "v"){
+		// if we want to constrain the dragging we 
+		// freeze y1
+		x1 = SVG.dragobj.getAttribute("x");
+	    };
+	    SVG.dragobj.setAttribute("x", x1);
+	    SVG.dragobj.setAttribute("y", y1);
+	    var t = "translate("+x1+","+y1+")";
+	    SVG.dragobj.setAttribute('transform', t);
+	    SVG.update_draggables();	    
+	}
+};
+
+SVG.update_draggables = function(){
+    // delete all lines and redraw them all
+    for(i in Wires){
+	var wire = Wires[i];
+	//console.log('here',[wire,V[wire.index]]);
+	V['svg'].removeChild(V[wire.index]);
+	delete V[wire.index];
+	draw_the_wire(i);
+    };
+}
+
+SVG.mouse_down = function(evt)
+{
+    var t = evt.target.parentNode;
+    //console.log("clicked on type=", [t,t.type]);
+    if(t.type == "button"){
+	// fire the button method
+	t.obj.clicked();
+    } else if(t.type == "draggable") {
+	SVG.dragging = true;
+	SVG.dragobj = t;
+	var x = evt.clientX + window.scrollX;
+	var y = evt.clientY + window.scrollY;
+	var cxstart = t.getAttribute("x");
+	var cystart = t.getAttribute("y");
+	SVG.xstart = x - cxstart;
+	SVG.ystart = y - cystart;
+	// console.log('start drag',[t.id,t.type,t]);
+	//send_json({cmd:'start_drag',x:cxstart,y:cystart,id:t.id});
+	// SVG.log("start dragging t.type="+t.type+
+	// " x=" +cxstart+" y="+cystart);
+    }
+};
+
+
+</script>
+
+<h2>Visual erlang</h2>
+
+<p>need to have absolute tree like name for all rendered attributes.</p>
+
+ 
+<table>
+  <tr>
+    <td><div id="here"></div></td>
+    <td valign="top">
+    <div id="control">
+    <select id="select">
+    </select>
+    <div id="edit"></div>
+    <button id="update">update</button>   
+    </div>
+ </td>
+   
+  </tr>
+</table>
+
+  

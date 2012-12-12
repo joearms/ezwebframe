@@ -1,0 +1,11 @@
+Install
+
+rebar get-deps
+rebar compile
+
+Then edit your paths to include ezweb frame
+My ${HOME}/.erlang has this
+
+code:add_patha("/Users/joe/next/apps/ezwebframe/ebin").
+code:add_patha("/Users/joe/next/apps/ezwebframe/deps/cowboy/ebin").	
+code:add_patha("/Users/joe/next/apps/ezwebframe/deps/ranch/ebin").	

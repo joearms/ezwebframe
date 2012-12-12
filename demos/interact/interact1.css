@@ -1,0 +1,22 @@
+body {margin-left:100px;
+      border-radius:10px;
+      padding:1em;
+      width:320px;
+      height:280px;
+      border: 2px solid black;
+      box-shadow:black 0.2em 0.2em 0.2em;
+     }
+
+#scroll{height:10em;
+	width:300px;
+	background-color:#efefef;
+	padding:10px;
+	overflow-y:scroll;
+	box-shadow:black 0.1em 0.1em 0.1em;
+	border-radius: 10px;
+       }
+
+#input { width:320px;
+	box-shadow:black 0.1em 0.1em 0.1em;
+	border-radius: 2px;
+}

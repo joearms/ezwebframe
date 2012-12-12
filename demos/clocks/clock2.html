@@ -1,0 +1,21 @@
+<script type="text/javascript" src="/common/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/ezwebframe/websock.js"></script>
+<link rel="stylesheet" href="clock1.css" type="text/css">
+
+<body>
+    <div id="clock"></div>
+    <button id="b1">start</button>
+    <button id="b2">stop</button>
+    <p>For a detailed explantion of how this works see
+    <a href="clock1.html">clock1.html</a></p>
+</body>
+
+<script>
+$(document).ready(run);
+
+function run(){
+    $("#b1").click(function(){ send_json({clicked:'start'}); });
+    $("#b2").click(function(){ send_json({clicked:'stop'}); });
+    connect_to_erlang("localhost", 1456, "clock1");
+}
+</script>

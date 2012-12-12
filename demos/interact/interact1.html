@@ -1,0 +1,19 @@
+<script type="text/javascript" src="/common/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="/ezwebframe/websock.js"></script>
+<link rel="stylesheet" href="interact1.css" type="text/css">
+
+<body>
+  <h2>Interaction</h2>
+  <div id="scroll"></div>
+  <br>
+  <input class="live_input" id="input"></input>
+</body>
+
+<script>
+
+$(document).ready(run);
+
+function run(){
+    connect_to_erlang("localhost", 1456, "interact1");
+}
+</script>

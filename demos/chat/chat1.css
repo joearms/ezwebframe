@@ -1,0 +1,36 @@
+body {margin-left:100px;
+      border-radius:10px;
+      padding:1em;
+      width:450px;
+      height:320px;
+      border: 2px solid black;
+      box-shadow:black 0.2em 0.2em 0.2em;
+     }
+
+#scroll{height:200px;
+	width:300px;
+	background-color:#efefef;
+	padding:10px;
+	overflow-y:scroll;
+	box-shadow:black 0.1em 0.1em 0.1em;
+	border-radius: 10px;
+       }
+
+#users{width:100px;
+       height:200px;
+       padding: 10px;
+       box-shadow:black 0.1em 0.1em 0.1em;
+       border-radius: 10px;
+       border:1px solid black}
+
+#tell { width:320px;
+	box-shadow:black 0.1em 0.1em 0.1em;
+	border-radius: 2px;
+}
+
+#nick_input { width:120px;
+	box-shadow:black 0.1em 0.1em 0.1em;
+	border-radius: 2px;
+}
+
+
