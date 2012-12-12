@@ -1,22 +1,30 @@
 ezwebframe
 ==========
 
-websockets framework toghter with cowboy as described in book
+Websockets framework together with cowboy as described in my book
+Programming Erlang (2'nd edition) (To be published in 2013).
 
-This program uses rebar to fetch and install the necessary dependecies
 
-To install
+INSTALLATION
+============
 
-In this directory give two commands
+This program uses rebar to fetch and install the necessary dependencies.
+First you need to install rebar. If you don't have rebar then you can install
+a pre-build binary from https://github.com/rebar/rebar/wiki/rebar.
 
+To install:
+
+Give the following command ONCE only:
+
+<pre>
    $ rebar get-deps
-   $ rebar compile
+</pre>
 
 To run the demos
 
-   $cd demos 
-   $make
-
+<pre>
+   $ make
+</pre>
 
 
    
