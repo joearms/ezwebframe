@@ -66,7 +66,7 @@ function make_live_buttons(){
 	    var txt = b.text();
 	    b.click(function(){
 		// console.log('clicked',txt);
-		send_json({'clicked':txt});
+		send_json({clicked:txt});
 	    });
 	});
 }

@@ -17,7 +17,8 @@ Browser ! [{cmd,fill_div},{id,div1},{txt, Bin}]
 Assuming the browser has a div with id = div1, then the div will be filled with
 some HTML contained in the binary Bin.
 
-Likewise buttons and controls in the browser, when pressed, send messages to Erlang.
+Likewise buttons and controls in the browser, when pressed, send
+messages to Erlang.
 
 This system is built using websockets together with cowboy and is
 described in my book Programming Erlang (2'nd edition) (To be

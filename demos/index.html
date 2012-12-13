@@ -3,17 +3,34 @@ body {margin-left:3em; width:70%}
 pre {font-weight:bold}
 </style>
 
-<h2>Ezwebframe</h2>
+<h1>Ezwebframe</h1>
 
 <p>This is a pre-release of ezwebframe (pronounced "Easy web frame") the easy
 way to connect Erlang to the browser.</p>
 
 <p>The techniques used in this program are described in the second edition
 of my book <i>Programming Erlang</i> which will be published in 2013.
- 
+
+<h1>Warning</h1>
+
+<p>I have only tested this in the chrome browser.  
 
 <hr>
-<h2>How does it work?</h2>
+<h2>Demos</h2>
+
+<p>These examples are more or less in order of increasing complexity
+
+<ul>
+  <li><a href="clocks/clock1.html">A digital clock</a></li>
+  <li><a href="interact/interact1.html">An interaction widget</a></li>
+  <li><a href="shell/shell1.html">An Erlang shell widget</a></li>
+  <li><a href="chat/chat1.html">Basic chat widget</a></li>
+  <li><a href="chat/chat2.html">Chat widget with irc backend</a></li>
+  <li><a href="svg/svg1.html">Simple SVG widget</a></li>
+</ul>
+
+<hr>
+<h2>How does ezwebframe work?</h2>
 
 <p>Assume we have some divs on a web page, something like this:</p>
 
@@ -29,38 +46,44 @@ of my book <i>Programming Erlang</i> which will be published in 2013.
 <p>To fill a div with HTML, Erlang evaluates code like this:</p>
 
 <pre>
-Browser ! [{cmd, fill_div, {div, a}, {text, Bin}]
+Browser ! [{cmd, fill_div}, {div, a}, {text, Bin}]
 </pre>
 
-<p>Where <b>Bin</b> is a binary containing HTML.
+<p>Where <b>Bin</b> is a binary containing HTML.</p>
+
+<p>In the browser this is converted to the javascript function call
+<b>fill_div(o)</b> where <b>o = {cmd:'fill_div', id='a', text=Bin}</b>.
+<b>fill_div</b> makes use of jQuery and is defined like this:</p>
+
+<pre>
+function fill_div(o){
+    $('#'+o.id).html(o.txt);
+}
+</pre>
+
+<p>This design is easily extensible so you add your own commands.
 
 <p>We can add controls (buttons, links) etc. to the page. When they
 are pressed, messages are sent to Erlang. For example, when we press a
-button in the browser, the controlling Erlang process can receive the
+button in the browser, we might evalute the javascript command:</p>
+
+<pre>
+send_json({'clicked':'mybutton'});
+</pre>
+
+<p>And the controlling Erlang process can receive the
 message like this:
 
 <pre>
 receive
-    {Browser, {struct,[{clicked,ButtonName}]}} -> 
+    {Browser, {struct,[{clicked,mybutton}]}} -> 
         ...
 </pre>
 
-<p>For a more detailed explanation, take a look at <a href="clocks/clock1.html">the first
-example program</a>.
+<p>For a more detailed explanation, take a look at <a
+href="clocks/clock1.html">the first example program</a>.
 <hr>
-<h2>Index</h2>
 
-<p>These examples are more or less in order of increasing complexity
-
-<ul>
-  <li><a href="clocks/clock1.html">A digital clock</a></li>
-  <li><a href="interact/interact1.html">An interaction widget</a></li>
-  <li><a href="shell/shell1.html">An Erlang shell widget</a></li>
-  <li><a href="chat/chat1.html">Basic chat widget</a></li>
-  <li><a href="chat/chat2.html">Chat widget with irc backend</a></li>
-  <li><a href="svg/svg1.html">Simple SVG widget</a></li>
-</ul>
-<hr>
 <h2>Experimental</h2>
 <ul>
   <li><a href="svg/svg_pad4.html">SVG playground</a></li>
