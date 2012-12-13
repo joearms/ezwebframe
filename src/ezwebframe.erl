@@ -88,7 +88,14 @@ handle(Req, Env) ->
     F = Env#env.dispatch,
     Res1 = F(Resource),
     io:format("mapped to:~p~n",[Res1]),
-    serve_file(Res1, Req, Env).
+    case Resource of
+	"/" ->
+	    serve_file("index.html", Req, Env);
+	"/files" ->
+	    list_dir(F("/"), Req, Env);
+	_ ->
+	    serve_file(Res1, Req, Env)
+    end.
 
 serve_file(File, Req, Env) ->
     case filelib:is_dir(File) of
@@ -107,9 +114,16 @@ serve_abs_file(File, Req, Env) ->
 	    reply_html(pre({no_page_called,File}), Req, Env);
 	{ok, Bin} ->
 	    Ext = filename:extension(File),
-	    {ok, Req1} = send_page(classify_extension(Ext), Bin, Req),
+	    Bin1 = add_wrapper(Ext, Bin),
+	    {ok, Req1} = send_page(classify_extension(Ext), Bin1, Req),
 	    {ok, Req1, Env}
     end.
+
+add_wrapper(".erl", B) ->
+    ["<pre>", B, "</pre>"];
+add_wrapper(_, B) ->
+    B.
+
 
 list_dir(Root, Req, Env) ->
     io:format("List dir:~p~n",[Root]),

@@ -1,5 +1,5 @@
 function connect_to_erlang(host, port, mod){
-    console.log('connect', [host,port,mod]);
+    // console.log('connect', [host,port,mod]);
     make_live_buttons();
     make_live_inputs();
     var ws = 'ws://' + host + ':' + port + '/websocket/' + mod;
@@ -9,8 +9,9 @@ function connect_to_erlang(host, port, mod){
 function onClose(evt) {
     // change the color of the display when the socket closes
     // so we can see it closed
-    console.log('closed');
-    document.body.style.backgroundColor='#aabbcc';
+    // console.log('closed');
+    document.body.style.backgroundColor='#ffb2b2';
+    alert("Socket closed - your erlang probably crashed");
 }  
   
 function onMessage(evt) {
@@ -29,7 +30,7 @@ function send(msg) {
 }
   
 function start_session(wsUri){
-    console.log('start_session', wsUri);
+    // console.log('start_session', wsUri);
     websocket           = new WebSocket(wsUri); 
     websocket.onopen    = onOpen;
     websocket.onclose   = onClose;
@@ -39,7 +40,7 @@ function start_session(wsUri){
 }  
     
 function onOpen(evt) { 
-    console.log("connected");
+    // console.log("connected");
 }
 
 // START:do 
@@ -51,7 +52,7 @@ function do_cmds(objs){
 	if(eval("typeof("+o.cmd+")") == "function"){
 	    eval(o.cmd + "(o)");
 	} else {
-	    console.log('bad_cmd', o);
+	    // console.log('bad_cmd', o);
 	    alert("bad_command:"+o.cmd);
 	};
     };
@@ -64,14 +65,14 @@ function make_live_buttons(){
 	    var b=$(this);
 	    var txt = b.text();
 	    b.click(function(){
-		console.log('clicked',txt);
-			send_json({'clicked':txt});
-		    });
+		// console.log('clicked',txt);
+		send_json({'clicked':txt});
+	    });
 	});
 }
 
 function send_json(x){
-    console.log('send',x);
+    // console.log('send',x);
     send(JSON.stringify(x));
 }
 

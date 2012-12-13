@@ -1,15 +1,53 @@
 <style>
 body {margin-left:3em; width:70%}
+pre {font-weight:bold}
 </style>
 
-<h2>Do do</h2>
-<ul>
-  <li><strike>Add LICENSE</strike></li>
-  <li><strike>git_ignore</strike></li>
-  <li>Remove debug statments for chrome</li>
-  <li><strike>Release</strike></li>
-</ul>
+<h2>Ezwebframe</h2>
 
+<p>This is a pre-release of ezwebframe (pronounced "Easy web frame") the easy
+way to connect Erlang to the browser.</p>
+
+<p>The techniques used in this program are described in the second edition
+of my book <i>Programming Erlang</i> which will be published in 2013.
+ 
+
+<hr>
+<h2>How does it work?</h2>
+
+<p>Assume we have some divs on a web page, something like this:</p>
+
+<pre>
+&lt;div id="a">
+..
+&lt;/div>
+&lt;div id="b">
+..
+&lt;/div>
+</pre>
+
+<p>To fill a div with HTML, Erlang evaluates code like this:</p>
+
+<pre>
+Browser ! [{cmd, fill_div, {div, a}, {text, Bin}]
+</pre>
+
+<p>Where <b>Bin</b> is a binary containing HTML.
+
+<p>We can add controls (buttons, links) etc. to the page. When they
+are pressed, messages are sent to Erlang. For example, when we press a
+button in the browser, the controlling Erlang process can receive the
+message like this:
+
+<pre>
+receive
+    {Browser, {struct,[{clicked,ButtonName}]}} -> 
+        ...
+</pre>
+
+<p>For a more detailed explanation, take a look at <a href="clocks/clock1.html">the first
+example program</a>.
+<hr>
 <h2>Index</h2>
 
 <p>These examples are more or less in order of increasing complexity
@@ -22,9 +60,17 @@ body {margin-left:3em; width:70%}
   <li><a href="chat/chat2.html">Chat widget with irc backend</a></li>
   <li><a href="svg/svg1.html">Simple SVG widget</a></li>
 </ul>
-
+<hr>
 <h2>Experimental</h2>
 <ul>
-  <li><a href="svg/svg_pad4.html">SVG playgound</a></li>
+  <li><a href="svg/svg_pad4.html">SVG playground</a></li>
   <li><a href="svg/viserl1.html">An SVG widget</a></li>
+</ul>
+<hr>
+<h2>Files</h2>
+
+<ul>
+  <li>
+    <a href="/files">Files</a>
+  </li>
 </ul>
