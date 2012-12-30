@@ -9,8 +9,7 @@
 	 websocket_info/3,
 	 append_div/3,
 	 pre/1,
-	 fill_div/3,
-	 start_if_not_running/1
+	 fill_div/3
 	]).
 
 -import(ezwebframe_mochijson2, [encode/1, decode/1]).
