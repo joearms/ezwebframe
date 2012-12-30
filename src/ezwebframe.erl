@@ -22,12 +22,7 @@
 start_embedded(Port) ->
     ok   = start_if_not_running(ranch),
     ok   = start_if_not_running(cowboy),
-    web_server_start(Port, "zip"),
-    receive
-	after 
-	    infinity ->
-		true
-	end.
+    web_server_start(Port, "zip").
 
 start_link([PortAtom, DirAtom]) ->
     Port = list_to_integer(atom_to_list(PortAtom)),
@@ -36,33 +31,31 @@ start_link([PortAtom, DirAtom]) ->
     start_link(Dir, Port).
 
 start_link(Dispatch, Port) ->
+    io:format("starting crypto ranch and cowboy~n"),
     ok = start_if_not_running(crypto),
     ok = start_if_not_running(ranch),  
     ok = start_if_not_running(cowboy),
     ok = web_server_start(Port, Dispatch),
-    receive
-	after 
-	    infinity ->
-		true
-	end.
+    ok.
     
 web_server_start(Port, Dispatcher) ->
+    io:format("starting webserver ~n"),
     E0 = #env{dispatch=Dispatcher},
     Dispatch = [{'_', [{'_', ?MODULE, E0}]}],  
     %% server is the name of this module
     NumberOfAcceptors = 100,
     Status = 
-	cowboy:start_http(my_named_thing,
-			  NumberOfAcceptors,
-			  [{port, Port}],
-			  [{dispatch, Dispatch}]),
+    	cowboy:start_http(my_named_thing,
+    			  NumberOfAcceptors,
+    			  [{port, Port}],
+    			  [{dispatch, Dispatch}]),
     case Status of
-	{error, _} ->
-	    io:format("websockets could not be started -- "
-		      "port ~p probably in use~n", [Port]),
-	    init:stop();
-	{ok, _Pid} ->
-	    io:format("websockets started on port:~p~n",[Port])
+    	{error, _} ->
+    	    io:format("websockets could not be started -- "
+    		      "port ~p probably in use~n", [Port]),
+    	    init:stop();
+    	{ok, _Pid} ->
+    	    io:format("websockets started on port:~p~n",[Port])
     end.
 
 init(_, Req, E0) ->   
@@ -90,7 +83,10 @@ handle(Req, Env) ->
     io:format("mapped to:~p~n",[Res1]),
     case Resource of
 	"/" ->
-	    serve_file("index.html", Req, Env);
+	    case filelib:is_file("index.html") of
+		true -> serve_file("index.html", Req, Env);
+		false -> serve_file(Res1,Req,Env)
+	    end;
 	"/files" ->
 	    list_dir(F("/"), Req, Env);
 	_ ->
@@ -264,9 +260,12 @@ atomize(X) ->
     X.
 
 start_if_not_running(App) ->
-    case application:get_application(App) of
-	{ok, App} -> ok;
-	undefined -> application:start(App)
+    Running = [A || {A,_Name,_Version} <- application:which_applications(), A =:= App],
+    case Running of
+	[] -> 
+	    application:start(App);
+	 _ ->
+	    ok
     end.
 %%----------------------------------------------------------------------
 %% these are to be called from the gui client code
