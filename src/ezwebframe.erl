@@ -31,7 +31,6 @@ start_link([PortAtom, DirAtom]) ->
     start_link(Dir, Port).
 
 start_link(Dispatch, Port) ->
-    io:format("starting crypto ranch and cowboy~n"),
     ok = start_if_not_running(crypto),
     ok = start_if_not_running(ranch),  
     ok = start_if_not_running(cowboy),
@@ -39,7 +38,6 @@ start_link(Dispatch, Port) ->
     ok.
     
 web_server_start(Port, Dispatcher) ->
-    io:format("starting webserver ~n"),
     E0 = #env{dispatch=Dispatcher},
     Dispatch = [{'_', [{'_', ?MODULE, E0}]}],  
     %% server is the name of this module
