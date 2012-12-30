@@ -9,7 +9,8 @@
 	 websocket_info/3,
 	 append_div/3,
 	 pre/1,
-	 fill_div/3
+	 fill_div/3,
+	 start_if_not_running/1
 	]).
 
 -import(ezwebframe_mochijson2, [encode/1, decode/1]).
@@ -20,8 +21,8 @@
 -record(env, {dispatch}).
 
 start_embedded(Port) ->
-    ok   = application:start(ranch),
-    ok   = application:start(cowboy),
+    ok   = start_if_not_running(ranch),
+    ok   = start_if_not_running(cowboy),
     web_server_start(Port, "zip"),
     receive
 	after 
@@ -36,9 +37,9 @@ start_link([PortAtom, DirAtom]) ->
     start_link(Dir, Port).
 
 start_link(Dispatch, Port) ->
-    ok = application:start(crypto),
-    ok = application:start(ranch),  
-    ok = application:start(cowboy),
+    ok = start_if_not_running(crypto),
+    ok = start_if_not_running(ranch),  
+    ok = start_if_not_running(cowboy),
     ok = web_server_start(Port, Dispatch),
     receive
 	after 
@@ -263,6 +264,11 @@ atomize(L) when is_list(L) ->
 atomize(X) ->
     X.
 
+start_if_not_running(App) ->
+    case application:get_application(App) of
+	{ok, App} -> ok;
+	undefined -> application:start(App)
+    end.
 %%----------------------------------------------------------------------
 %% these are to be called from the gui client code
 
