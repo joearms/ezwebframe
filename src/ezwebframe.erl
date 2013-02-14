@@ -48,14 +48,14 @@ start_link(Dispatch, Port) ->
     
 web_server_start(Port, Dispatcher) ->
     E0 = #env{dispatch=Dispatcher},
-    Dispatch = [{'_', [{'_', ?MODULE, E0}]}],  
+    Dispatch = cowboy_router:compile( [{'_', [{'_', ?MODULE, E0}]}] ),  
     %% server is the name of this module
     NumberOfAcceptors = 100,
     Status = 
 	cowboy:start_http(my_named_thing,
 			  NumberOfAcceptors,
 			  [{port, Port}],
-			  [{dispatch, Dispatch}]),
+			  [{env, [{dispatch, Dispatch}]}]),
     case Status of
 	{error, _} ->
 	    io:format("websockets could not be started -- "
