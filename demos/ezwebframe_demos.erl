@@ -2,12 +2,10 @@
 -export([start/0]).
 
 %% This demo assumes that all your code
-%% the code paths to ezwebframe and simple_demo have beed setup 
+%% the code paths to ezwebframe and simple_demo are correct
 
 start() ->
-    %% compile all the code in the subdirectories
-    %% and set paths appropriately
-    io:format("a simple_demo....~n"),
+    io:format("a simple_demo of websockets....~n"),
     Port = 1456,
     io:format("Load the page http://localhost:~p/ in your browser~n",[Port]),
     ezwebframe:start_link(fun dispatch/1, Port).
