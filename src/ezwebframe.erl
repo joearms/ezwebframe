@@ -9,6 +9,7 @@
 	 websocket_info/3,
 	 append_div/3,
 	 pre/1,
+	 terminate/3,
 	 fill_div/3
 	]).
 
@@ -79,9 +80,10 @@ init(_, Req, E0) ->
 	    {ok, Req, E0}
     end.
 
-terminate(_, _) ->  
+terminate(_Reason,_Req,_State) ->
+    %% ignore why we terminate
     ok.
-    
+
 handle(Req, Env) ->
     Resource = filename:join(path(Req)),
     io:format("ezwebframe:handle ~p~n",[Resource]),
