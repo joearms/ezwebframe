@@ -62,7 +62,7 @@ running(Browser) ->
       
     <h2>Interacting with the clock</h2>
       
-    <p>Now we might want to start or stop stop the clock. This
+    <p>Now we might want to start or stop the clock. This
     needs some jquery trickery.</p>
       
     <p>The stop button is created with:</p>
@@ -75,7 +75,7 @@ $("#b1").click(function(){
 	send_json({clicked:'stop'});
     });
       </pre>
-      <p>And when we click stop button a JSON message is sent to the 
+      <p>And when we click the stop button, a JSON message is sent to the 
       Erlang server.</p>
       
       <p>The message to the server can be received with:</p>
@@ -92,7 +92,7 @@ end
 $(document).ready(run);
 
 function run(){
-    // when button b1 is press send a message to Erlang
+    // when button b1 is pressed send a message to Erlang
     $("#b1").click(function(){
 	send_json({clicked:'start'});
     });
