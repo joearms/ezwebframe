@@ -6,7 +6,7 @@ Pronounced "Easy web frame."
 Ezwebframe attempts to make web programming just a little bit easier.
 
 Erlang thinks that the browser is an Erlang process. To get the browser
-to do something Erlang send a message containing a command to the browser.
+to do something, Erlang sends a message containing a command to the browser.
 
 A typical message might be:
 
