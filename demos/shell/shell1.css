@@ -1,14 +1,14 @@
 body {margin-left:100px;
       border-radius:10px;
       padding:1em;
-      width:920px;
-      height:520px;
+      width:420px;
+      height:300px;
       border: 2px solid black;
       box-shadow:black 0.2em 0.2em 0.2em;
      }
 
-#scroll{height:20em;
-	width:900px;
+#scroll{height:12em;
+	width:400px;
 	font-family: "Courier New", Courier, monospace;
 	font-weight:bold;
 	background-color:#efefef;
@@ -18,7 +18,7 @@ body {margin-left:100px;
 	border-radius: 10px;
        }
 
-#input { width:920px;
+#input { width:420px;
 	box-shadow:black 0.1em 0.1em 0.1em;
 	border-radius: 2px;
 }

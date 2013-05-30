@@ -4,7 +4,7 @@
 %%START:shell1
 start(Browser) ->
     Browser ! [{cmd,append_div}, {id, scroll}, 
-	       {txt, <<"Starting Erlang shell yes<br>">>}],
+	       {txt, <<"Starting Erlang shell:<br>">>}],
     B0 = erl_eval:new_bindings(),
     IO = grab_io(),
     running(Browser, IO, B0, 1).
