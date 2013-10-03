@@ -17,14 +17,16 @@
 -record(env, {dispatch}).
 
 start_link(Dispatch, Port) ->
+    io:format("Starting:~p~n",[file:get_cwd()]),
     ok = application:start(crypto),
-    ok = application:start(ranch),  
+    ok = application:start(ranch), 
+    ok = application:start(cowlib), 
     ok = application:start(cowboy),
     ok = web_server_start(Port, Dispatch).
 
 web_server_start(Port, Dispatcher) ->
     E0 = #env{dispatch=Dispatcher},
-    Dispatch = cowboy_router:compile( [{'_', [{'_', ?MODULE, E0}]}] ),  
+    Dispatch = cowboy_router:compile([{'_',[{'_', ?MODULE, E0}]}]),  
     %% server is the name of this module
     NumberOfAcceptors = 100,
     Status = 
@@ -42,6 +44,7 @@ web_server_start(Port, Dispatcher) ->
     end.
 
 init(_, Req, E0) ->   
+    io:format("init:~n"),
     Resource = path(Req),
     case Resource of
 	["/", "websocket",_] ->
