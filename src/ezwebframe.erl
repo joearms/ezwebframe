@@ -1,8 +1,8 @@
 -module(ezwebframe).
 
 -export([start_link/2,
-	 init/3,      websocket_init/3,
-	 handle/2,    websocket_handle/3, 
+	 init/2,      
+	 websocket_handle/3, 
 	 terminate/3, websocket_terminate/3,
 	 websocket_info/3,
 	 append_div/3,
@@ -43,17 +43,22 @@ web_server_start(Port, Dispatcher) ->
 	    io:format("websockets started on port:~p~n",[Port])
     end.
 
-init(_, Req, E0) ->   
-    io:format("init:~n"),
+init(Req, E0) ->   
+    %% io:format("init:~n"),
     Resource = path(Req),
+    %% io:format("Resource:~p~n",[Resource]),
     case Resource of
-	["/", "websocket",_] ->
-	    %% The upgrade return value will cause cowboy
+	["/", "websocket",ModStr] ->
+	    Self = self(),
+	    Mod = list_to_atom(ModStr),
+	    %% Spawn an erlang handler
+	    %% The return value will cause cowboy
 	    %% to call this module at the entry point
-	    %% websocket_init
-	    {upgrade, protocol, cowboy_websocket};
+	    %% websocket_handle
+	    Pid = spawn_link(Mod, start, [Self]),
+	    {cowboy_websocket, Req, Pid};
 	_ ->
-	    {ok, Req, E0}
+	    handle(Req, E0)
     end.
 
 handle(Req, Env) ->
@@ -88,7 +93,7 @@ serve_abs_file(File, Req, Env) ->
 	{ok, Bin} ->
 	    Ext  = filename:extension(File),
 	    Bin1 = if_erlang_add_pre(Ext, Bin),
-	    {ok, Req1} = send_page(classify_extension(Ext), Bin1, Req),
+	    Req1 = send_page(classify_extension(Ext), Bin1, Req),
 	    {ok, Req1, Env}
     end.
 
@@ -116,11 +121,11 @@ send_page(Type, Data, Req) ->
 
 
 path(Req) ->
-    {Path,_} = cowboy_req:path(Req),
+    Path = cowboy_req:path(Req),
     filename:split(binary_to_list(Path)).
 
 reply_html(Obj, Req, Env) ->
-    {ok, Req1} = send_page(html, Obj, Req),
+    Req1 = send_page(html, Obj, Req),
     {ok, Req1, Env}.
 
 %%----------------------------------------------------------------------
@@ -132,17 +137,6 @@ terminate(_Reason,_Req,_State) ->
 
 %%----------------------------------------------------------------------
 %% websocket stuff
-
-websocket_init(_Transport, Req, _Env) ->
-    io:format("Initialising a web socket:(~p)(~p)(~p)",
-	      [_Transport, _Env, path(Req)]),
-    ["/", "websocket", ModStr] = path(Req),
-    Req1 = cowboy_req:compact(Req),
-    Self = self(),
-    Mod = list_to_atom(ModStr),
-    %% Spawn an erlang handler
-    Pid = spawn_link(Mod, start, [Self]),
-    {ok, Req1, Pid, hibernate}.
 
 websocket_handle({text, Msg}, Req, Pid) ->
     %% This is a Json message from the browser
