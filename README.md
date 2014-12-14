@@ -43,5 +43,11 @@ To run the demos
    $ make
 </pre>
 
+To clean up
+
+<pre>
+   $ make clean
+</pre>
+
 
    
