@@ -254,7 +254,7 @@ f2b(F, D) ->
 
 loop(Ws, B) ->
     receive
-	{msg,Json} ->
+	{From,Json} ->
 	    io:format("Received:~p~n",[Json]),
 	    loop(Ws, B);
 	X ->
